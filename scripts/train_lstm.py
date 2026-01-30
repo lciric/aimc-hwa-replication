@@ -45,6 +45,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def detach_hidden(hidden):
+    """Detach hidden state from computation graph.
+    
+    LSTM hidden is tuple of lists: ([h0, h1, ...], [c0, c1, ...])
+    """
+    if isinstance(hidden, tuple):
+        return tuple(
+            [h.detach() for h in hs] if isinstance(hs, list) else hs.detach()
+            for hs in hidden
+        )
+    elif isinstance(hidden, list):
+        return [h.detach() for h in hidden]
+    else:
+        return hidden.detach()
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='HWA Training for LSTM LM')
     
@@ -84,7 +100,7 @@ def train_epoch(model, train_data, criterion, lr, bptt, clip, ntokens, device):
         data, targets = get_lm_batch(train_data, i, bptt)
         
         # Detach hidden state from history
-        hidden = tuple(h.detach() for h in hidden) if isinstance(hidden, tuple) else hidden.detach()
+        hidden = detach_hidden(hidden)
         
         model.zero_grad()
         output, hidden = model(data, hidden)
@@ -121,7 +137,7 @@ def evaluate(model, data_source, criterion, bptt, ntokens):
         for i in range(0, data_source.size(0) - 1, bptt):
             data, targets = get_lm_batch(data_source, i, bptt)
             output, hidden = model(data, hidden)
-            hidden = tuple(h.detach() for h in hidden)
+            hidden = detach_hidden(hidden)
             total_loss += len(data) * criterion(output.view(-1, ntokens), targets).item()
     
     return total_loss / (len(data_source) - 1)
@@ -164,7 +180,7 @@ def evaluate_drift_with_gdc(model, test_data, criterion, bptt, ntokens,
         for i in range(0, test_data.size(0) - 1, bptt):
             data, targets = get_lm_batch(test_data, i, bptt)
             output, hidden = model(data, hidden)
-            hidden = tuple(h.detach() for h in hidden)
+            hidden = detach_hidden(hidden)
             total_loss += len(data) * criterion(output.view(-1, ntokens), targets).item()
     
     # Cleanup hooks
