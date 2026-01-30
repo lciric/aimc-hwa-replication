@@ -13,8 +13,8 @@ import torch
 import torch.nn as nn
 from typing import Optional, Tuple, List
 
-from .layers import AnalogLinear
-from .physics import PCMPhysicsEngine
+from ..layers import AnalogLinear
+from ..physics import PCMPhysicsEngine
 
 
 class AnalogLSTMCell(nn.Module):
