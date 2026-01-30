@@ -1,0 +1,70 @@
+# Configuration for WideResNet-16-4 on CIFAR-100
+# 
+# Matches paper settings for Table 3 results.
+# Expected: 76-77% @ 1 year with GDC
+
+model:
+  architecture: wideresnet16_4
+  num_classes: 100
+
+data:
+  dataset: cifar100
+  batch_size: 128
+  num_workers: 4
+
+teacher:
+  epochs: 200
+  lr: 0.1
+  optimizer: sgd
+  momentum: 0.9
+  weight_decay: 0.0005
+  lr_schedule: cosine
+
+student:
+  epochs: 80
+  lr: 0.01
+  optimizer: sgd
+  momentum: 0.9
+  weight_decay: 0.0005
+  lr_schedule: cosine
+
+hwa:
+  # Noise ramping (Section 3.2 in paper)
+  noise_scale_final: 3.0
+  noise_ramp_epochs: 10
+  
+  # Drop-connect (Section 3.3)
+  drop_connect_prob: 0.01
+  
+  # Weight remapping (DISABLED for SOTA - Section 3.4)
+  # Set to 0 to disable periodic remapping
+  remap_interval: 0
+  
+  # Quantization
+  gamma: 256  # 8-bit ADC/DAC
+
+distillation:
+  temperature: 4.0
+  alpha: 0.9  # 90% soft labels, 10% hard labels
+
+physics:
+  # IBM PCM parameters (Table S4)
+  g_max: 25.0  # µS
+  t0: 20.0     # seconds
+  drift_nu: 0.05
+  prog_coeffs: [0.26348, 1.9650, -1.1731]  # Before g_max normalization
+
+training:
+  seed: 42
+  device: cuda
+  checkpoint_dir: checkpoints
+  log_interval: 10
+
+evaluation:
+  # Drift times for evaluation
+  drift_times_seconds:
+    - 1         # 1 second
+    - 3600      # 1 hour
+    - 86400     # 1 day
+    - 31536000  # 1 year
+  n_samples: 3  # Samples for mean/std of accuracy
