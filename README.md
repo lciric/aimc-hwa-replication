@@ -210,6 +210,37 @@ $$\frac{G(1\text{ year})}{G_0} = \left(\frac{3.15 \times 10^7}{20}\right)^{-0.05
 | **CAWS** | Per-layer scaling α = √(3/fan_in) | Xavier-like initialization for quantized weights |
 | **Knowledge Distillation** | Soft targets from teacher (T=4, α=0.9) | Stabilize training with noise |
 
+### HWA Techniques Visualization
+
+<details>
+<summary><strong>Click to see technique visualizations from training</strong></summary>
+
+#### Noise Ramping Schedule
+<p align="center">
+  <img src="figures/noise_ramping.png" alt="Noise ramping from 0 to 3x over 10 epochs" width="70%">
+</p>
+<p align="center"><em>Linear noise ramp from 0→3× over first 10 epochs prevents training collapse.</em></p>
+
+#### Drop-Connect Distribution
+<p align="center">
+  <img src="figures/drop_connect.png" alt="Drop-connect zeroing ~1-2% of weights" width="70%">
+</p>
+<p align="center"><em>Drop-connect zeros ~1-2% of weights per forward pass, simulating stuck-at-fault defects.</em></p>
+
+#### Weight Remapping
+<p align="center">
+  <img src="figures/weight_remapping.png" alt="Weight distribution before and after remapping" width="70%">
+</p>
+<p align="center"><em>Remapping spreads weights to fully utilize the [-1, 1] conductance range.</em></p>
+
+#### CAWS (Crossbar-Aware Weight Scaling)
+<p align="center">
+  <img src="figures/caws_per_layer.png" alt="CAWS alpha values per layer" width="70%">
+</p>
+<p align="center"><em>Per-layer α values computed as √(3/fan_in) ensure proper weight scaling.</em></p>
+
+</details>
+
 ---
 
 ## Mathematical Formulation
